@@ -21,3 +21,11 @@ pip install schedule
 ・newsクラスを継承し、`track`メソッドをオーバーライドしてそれぞれのサイトを元にタグ情報を取得すると良いです。
 
 ・スケジューラーはschedule (https://schedule.readthedocs.io/en/stable/) を参考にするとlauncherのタイミングを変更できます。
+
+## 起動
+
+・上記でトークン用のiniファイルパスをパラメータに付け加えると完了
+
+```
+python ***.ini
+```
