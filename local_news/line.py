@@ -127,11 +127,11 @@ if __name__ == '__main__':
         sys.exit()
 
     alerm_time = "07:45"
-    schedule.every().monday.at("alerm_time").do(job)
-    schedule.every().tuesday.at("alerm_time").do(job)
-    schedule.every().wednesday.at("alerm_time").do(job)
-    schedule.every().thursday.at("alerm_time").do(job)
-    schedule.every().friday.at("alerm_time").do(job)
+    schedule.every().monday.at(alerm_time).do(job)
+    schedule.every().tuesday.at(alerm_time).do(job)
+    schedule.every().wednesday.at(alerm_time).do(job)
+    schedule.every().thursday.at(alerm_time).do(job)
+    schedule.every().friday.at(alerm_time).do(job)
 
     while True:
         schedule.run_pending()
