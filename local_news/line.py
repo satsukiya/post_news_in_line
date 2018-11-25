@@ -145,6 +145,7 @@ if __name__ == '__main__':
     func = lambda : job(args[1])
 
     #平日のみ配信
+    alerm_time = "07:45"
     schedule.every().monday.at(alerm_time).do(func)
     schedule.every().tuesday.at(alerm_time).do(func)
     schedule.every().wednesday.at(alerm_time).do(func)
