@@ -4,11 +4,13 @@
 from abc import ABCMeta, abstractmethod
 import configparser as cp
 from datetime import datetime
+from datetime import timedelta
 import os
 import random
 import requests
 import sys
 import time
+import ssl
 
 #package
 from bs4 import BeautifulSoup
@@ -64,13 +66,26 @@ class SorachiLocalNews(News):
         topics = []
 
         for item in links:
-            link = self._domain + item["href"]
-            title = item.find("div", class_="categoryArchiveItemTitle").text.strip()
-            topics.append([link,title])
+            article_date = item.find("div", class_="categoryArchiveItemDate").text.strip()
+            if self.fromDate(article_date, 1):
+                link = self._domain + item["href"]
+                title = item.find("div", class_="categoryArchiveItemTitle").text.strip()
+                topics.append([link,title])
 
         index = random.randrange(len(topics))
         
         return topics[index]
+
+    def fromDate(self, from_date, day_span):
+        
+        dst = False
+        now = datetime.now()
+        target_datetime = datetime.strptime(str(now.year) + "/" +from_date, '%Y/%m/%d %H:%M')
+        time_span = now - target_datetime
+
+        if time_span.days <= day_span:
+            dst = True
+        return dst
 
 class AsahikawaLocalNews(SorachiLocalNews):
     pass
@@ -94,9 +109,9 @@ class Composer:
         payload = {"message" :  "\n" + "\n".join(self._messages)}
 
         r = requests.post(self._url ,headers = headers ,params=payload)
-        print(str(vars(r)))
 
-def job():
+
+def job(file):
     s = SorachiLocalNews()
 
     #a = AsahikawaLocalNews()
@@ -106,12 +121,13 @@ def job():
     texts = ["[" + datetime.now().strftime("%Y/%m/%d %H:%M") + "]" + "サーバから配信"]
     texts += s.track()
 
-    c = Composer("sample-line.ini", texts)
+    c = Composer(file, texts)
     c.execute()
 
 
 if __name__ == '__main__':
     
+    ssl._create_default_https_context = ssl._create_unverified_context
     args = sys.argv
 
     if len(args) == 2:
@@ -126,12 +142,14 @@ if __name__ == '__main__':
         print("[USAGE] It is not a file parameter.")
         sys.exit()
 
-    alerm_time = "07:45"
-    schedule.every().monday.at(alerm_time).do(job)
-    schedule.every().tuesday.at(alerm_time).do(job)
-    schedule.every().wednesday.at(alerm_time).do(job)
-    schedule.every().thursday.at(alerm_time).do(job)
-    schedule.every().friday.at(alerm_time).do(job)
+    func = lambda : job(args[1])
+
+    #平日のみ配信
+    schedule.every().monday.at(alerm_time).do(func)
+    schedule.every().tuesday.at(alerm_time).do(func)
+    schedule.every().wednesday.at(alerm_time).do(func)
+    schedule.every().thursday.at(alerm_time).do(func)
+    schedule.every().friday.at(alerm_time).do(func)
 
     while True:
         schedule.run_pending()
